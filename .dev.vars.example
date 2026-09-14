@@ -1,0 +1,15 @@
+# Copy this file to `.dev.vars` for local development with `wrangler dev`.
+# `.dev.vars` is gitignored — never commit real secrets.
+
+# Discord bot token (from Discord Developer Portal > your app > Bot > Reset Token).
+DISCORD_BOT_TOKEN="your-discord-bot-token"
+
+# Local-only: skip Cloudflare Access JWT verification so you can test tools
+# with `wrangler dev` (there is no Access proxy in front of a local dev server).
+# NEVER set this to "true" in production.
+DEV_AUTH_BYPASS="true"
+
+# Optional local overrides (otherwise taken from wrangler.jsonc "vars"):
+# DISCORD_GUILD_ID="your-guild-id"
+# ACCESS_TEAM_DOMAIN="https://myjacobsnetwork.cloudflareaccess.com"
+# ACCESS_AUD="your-access-application-aud-tag"
