@@ -9,10 +9,10 @@ compatibility_flags = ["nodejs_compat"]
 # domain instead.
 workers_dev = false
 
-# Replace with a subdomain on a domain you own in this Cloudflare account
-# (the zone must be active in Cloudflare DNS). Not secret; safe to commit.
+# Served on a subdomain of charmandcrit.com (a zone in this Cloudflare account).
+# The zone must be active in Cloudflare DNS. Not secret; safe to commit.
 [[routes]]
-pattern = "dnd-mcp.CHANGE-ME.example.com"
+pattern = "dnd-mcp.charmandcrit.com"
 custom_domain = true
 
 [observability]

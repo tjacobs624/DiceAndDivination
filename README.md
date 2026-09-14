@@ -89,7 +89,7 @@ Config is split the same way as `discord-oidc`: **secrets and deploy config neve
    Leave `accessAud` as the placeholder for now; you set it in **Step 4** and redeploy.
 
 2. **`wrangler.toml`** (committed — no secrets here). Set `routes[0].pattern` to the custom
-   hostname you'll serve on, e.g. `dnd-mcp.yourdomain.com` (a subdomain on a zone in your Cloudflare
+   hostname you'll serve on, e.g. `dnd-mcp.charmandcrit.com` (a subdomain on a zone in your Cloudflare
    account). The hostname isn't secret, so it's fine to commit.
 
 3. The **bot token** is a Cloudflare secret, set in Step 3 — never in a file.
@@ -107,7 +107,7 @@ npm run deploy
 
 The `[[routes]]` entry with `custom_domain = true` tells Cloudflare to create the custom hostname
 and route it to this Worker (the zone must already exist in your account). After deploy, visiting
-`https://dnd-mcp.yourdomain.com/` should return a small "is running" message.
+`https://dnd-mcp.charmandcrit.com/` should return a small "is running" message.
 
 > The `/mcp` endpoint itself will return **401 unauthorized** until you put Access in front of it —
 > that's expected and correct.
@@ -123,14 +123,14 @@ the Worker.
 In the **Zero Trust dashboard** (one.dash.cloudflare.com):
 
 1. **Access → Applications → Add an application → Self‑hosted.**
-   - **Application domain:** `dnd-mcp.yourdomain.com` (the same hostname as Step 2).
+   - **Application domain:** `dnd-mcp.charmandcrit.com` (the same hostname as Step 2).
    - Save. Open the application and copy its **Application Audience (AUD) Tag** — a long hex string.
    - Add a **policy**: Action **Allow**, and a rule that identifies *you* — e.g. Emails =
      your email, or (using your `discord-oidc` login method) your Discord identity / a specific
      Discord server membership.
 2. **Access → AI controls → MCP servers → Add an MCP server.**
    - **Name:** `Dice & Divination`
-   - **HTTP URL:** `https://dnd-mcp.yourdomain.com/mcp`  ← include the `/mcp` path.
+   - **HTTP URL:** `https://dnd-mcp.charmandcrit.com/mcp`  ← include the `/mcp` path.
    - Attach the same Access policy (only you).
    - **Advanced settings → enable *Managed OAuth*.**
 3. Put the **AUD tag** from step 1 into `config.json` → `accessAud`, then redeploy:
@@ -149,7 +149,7 @@ In the **Zero Trust dashboard** (one.dash.cloudflare.com):
 
 1. In Claude (claude.ai → **Settings → Connectors**, or the Cowork connector UI) → **Add custom
    connector**.
-2. Paste the MCP URL: `https://dnd-mcp.yourdomain.com/mcp`.
+2. Paste the MCP URL: `https://dnd-mcp.charmandcrit.com/mcp`.
 3. Click **Connect**. Claude discovers Access's OAuth, redirects you to
    `myjacobsnetwork.cloudflareaccess.com`, you **sign in with Discord**, and you're linked.
 4. In a Cowork session / chat, enable the connector and its tools. Try:
