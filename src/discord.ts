@@ -1,4 +1,8 @@
-import type { Env } from "./types";
+/** Minimal env shape the Discord client needs. */
+export interface DiscordEnv {
+  DISCORD_BOT_TOKEN: string;
+  DISCORD_GUILD_ID?: string;
+}
 
 const API = "https://discord.com/api/v10";
 
@@ -47,7 +51,7 @@ export interface CleanMessage {
   reply_to?: string;
 }
 
-async function discordFetch<T>(env: Env, path: string): Promise<T> {
+async function discordFetch<T>(env: DiscordEnv, path: string): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     headers: {
       Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
@@ -98,18 +102,18 @@ export function cleanChannel(c: RawChannel) {
   };
 }
 
-export async function listChannels(env: Env, guildId: string): Promise<RawChannel[]> {
+export async function listChannels(env: DiscordEnv, guildId: string): Promise<RawChannel[]> {
   const channels = await discordFetch<RawChannel[]>(env, `/guilds/${guildId}/channels`);
   return channels
     .filter((c) => TEXTLIKE_CHANNEL_TYPES.has(c.type))
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 }
 
-export async function getChannel(env: Env, channelId: string): Promise<RawChannel> {
+export async function getChannel(env: DiscordEnv, channelId: string): Promise<RawChannel> {
   return discordFetch<RawChannel>(env, `/channels/${channelId}`);
 }
 
-export async function getGuild(env: Env, guildId: string): Promise<unknown> {
+export async function getGuild(env: DiscordEnv, guildId: string): Promise<unknown> {
   return discordFetch(env, `/guilds/${guildId}?with_counts=true`);
 }
 
@@ -120,7 +124,7 @@ export interface HistoryOptions {
 }
 
 export async function getMessages(
-  env: Env,
+  env: DiscordEnv,
   channelId: string,
   opts: HistoryOptions = {}
 ): Promise<RawMessage[]> {
@@ -136,7 +140,7 @@ export async function getMessages(
   return messages.reverse();
 }
 
-export async function getPins(env: Env, channelId: string): Promise<RawMessage[]> {
+export async function getPins(env: DiscordEnv, channelId: string): Promise<RawMessage[]> {
   const pins = await discordFetch<RawMessage[]>(env, `/channels/${channelId}/pins`);
   return pins.reverse();
 }
@@ -147,7 +151,7 @@ export async function getPins(env: Env, channelId: string): Promise<RawMessage[]
  * scan recent history instead (bounded by maxScan).
  */
 export async function searchMessages(
-  env: Env,
+  env: DiscordEnv,
   channelId: string,
   opts: { query?: string; authorId?: string; maxScan?: number; limit?: number }
 ): Promise<CleanMessage[]> {
@@ -188,14 +192,14 @@ export interface RawMember {
   joined_at?: string;
 }
 
-export async function listMembers(env: Env, guildId: string, limit = 100): Promise<RawMember[]> {
+export async function listMembers(env: DiscordEnv, guildId: string, limit = 100): Promise<RawMember[]> {
   const capped = Math.min(Math.max(limit, 1), 1000);
   return discordFetch<RawMember[]>(env, `/guilds/${guildId}/members?limit=${capped}`);
 }
 
 /** Resolve a channel argument that may be an ID or a #name into a channel ID. */
 export async function resolveChannelId(
-  env: Env,
+  env: DiscordEnv,
   guildId: string,
   channelRef: string
 ): Promise<string> {

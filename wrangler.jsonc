@@ -1,0 +1,51 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dnd-discord-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-10",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Served from a custom domain in this Cloudflare account. Cloudflare Access is
+  // NOT in front of this Worker — the Worker runs its own OAuth server and uses
+  // Access for SaaS as the upstream identity provider. So workers.dev could also
+  // be used; the custom domain just gives a clean, stable connector URL.
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "dnd-mcp.charmandcrit.com",
+      "custom_domain": true
+    }
+  ],
+
+  // McpAgent stores per-session MCP state in a Durable Object.
+  "migrations": [
+    {
+      "new_sqlite_classes": ["MyMCP"],
+      "tag": "v1"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "MyMCP",
+        "name": "MCP_OBJECT"
+      }
+    ]
+  },
+
+  // OAuth token/grant/state storage for @cloudflare/workers-oauth-provider.
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "71ac891b6f3d4559a64b2f5f921d1dfe"
+    }
+  ],
+
+  "observability": { "enabled": true }
+
+  // Secrets are set in the dashboard / via `wrangler secret put` after the first
+  // deploy — never committed here:
+  //   ACCESS_CLIENT_ID, ACCESS_CLIENT_SECRET, ACCESS_TOKEN_URL,
+  //   ACCESS_AUTHORIZATION_URL, ACCESS_JWKS_URL, COOKIE_ENCRYPTION_KEY,
+  //   DISCORD_BOT_TOKEN, DISCORD_GUILD_ID, (optional) ALLOWED_EMAILS
+}

@@ -2,23 +2,23 @@
   "name": "dnd-discord-mcp",
   "version": "0.1.0",
   "private": true,
-  "description": "Remote MCP server on Cloudflare Workers that lets Claude read a Discord D&D channel for context, protected by Cloudflare Access (Managed OAuth).",
-  "type": "module",
+  "description": "Remote MCP server on Cloudflare Workers that lets Claude read a Discord D&D server, authenticated with OAuth via Cloudflare Access (Access for SaaS) and Discord sign-in.",
   "scripts": {
-    "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit",
-    "cf-typegen": "wrangler types"
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "2.0.0",
-    "agents": "^0.23.0",
-    "jose": "^5.9.6",
-    "zod": "^4.5.4"
+    "@cloudflare/workers-oauth-provider": "^0.8.1",
+    "agents": "^0.17.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260911.1",
+    "@types/node": "^26.0.1",
     "typescript": "^5.6.0",
-    "wrangler": "^4.30.0"
+    "wrangler": "^4.105.0"
   }
 }
