@@ -18,8 +18,9 @@ custom_domain = true
 [observability]
 enabled = true
 
-# NOTE: There are intentionally no [vars] here.
-#  - The Discord bot token is a SECRET: `wrangler secret put DISCORD_BOT_TOKEN`.
-#  - Deploy config (guild ID, Access team domain + AUD) lives in `config.json`,
-#    which is gitignored. Copy `config.sample.json` to `config.json` and fill it
-#    in. Nothing real is ever committed.
+# NOTE: There are intentionally no [vars] here. Nothing is hardcoded or committed.
+# All runtime config is injected as Cloudflare secrets (or .dev.vars locally):
+#   wrangler secret put DISCORD_BOT_TOKEN
+#   wrangler secret put DISCORD_GUILD_ID
+#   wrangler secret put ACCESS_TEAM_DOMAIN
+#   wrangler secret put ACCESS_AUD

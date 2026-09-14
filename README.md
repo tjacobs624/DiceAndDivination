@@ -73,26 +73,21 @@ All tools accept a channel **ID** or a **`#channel-name`**, and default to your 
 
 ## Step 2 — Configure the project
 
-Config is split the same way as `discord-oidc`: **secrets and deploy config never get committed.**
+Nothing is hardcoded or committed. All config is injected at runtime as **Cloudflare secrets**
+(set in Step 3), or via **`.dev.vars`** for local dev. The only committed config is the non‑secret
+custom‑domain route in `wrangler.toml`.
 
-1. **`config.json`** (gitignored — real values live here only). Copy the sample and fill it in:
-   ```bash
-   cp config.sample.json config.json
-   ```
-   ```jsonc
-   {
-     "guildId": "your D&D server ID (Step 1.5)",
-     "accessTeamDomain": "https://myjacobsnetwork.cloudflareaccess.com",
-     "accessAud": "fill in after Step 4 (the Access application AUD tag)"
-   }
-   ```
-   Leave `accessAud` as the placeholder for now; you set it in **Step 4** and redeploy.
+The runtime bindings the Worker reads from `env`:
 
-2. **`wrangler.toml`** (committed — no secrets here). Set `routes[0].pattern` to the custom
-   hostname you'll serve on, e.g. `dnd-mcp.charmandcrit.com` (a subdomain on a zone in your Cloudflare
-   account). The hostname isn't secret, so it's fine to commit.
+| Binding | Value | Notes |
+|---|---|---|
+| `DISCORD_BOT_TOKEN` | your Discord bot token | secret |
+| `DISCORD_GUILD_ID` | your D&D server ID (Step 1.5) | e.g. `1472702824109314058` |
+| `ACCESS_TEAM_DOMAIN` | `https://myjacobsnetwork.cloudflareaccess.com` | your Access team domain |
+| `ACCESS_AUD` | the Access application AUD tag | created in **Step 4** — set it then |
 
-3. The **bot token** is a Cloudflare secret, set in Step 3 — never in a file.
+Set the custom hostname in **`wrangler.toml`** (`routes[0].pattern`, already
+`dnd-mcp.charmandcrit.com`). The hostname isn't secret, so it's fine to commit.
 
 ---
 
@@ -101,7 +96,13 @@ Config is split the same way as `discord-oidc`: **secrets and deploy config neve
 ```bash
 npm install
 npx wrangler login            # authorize wrangler to your Cloudflare account
-npx wrangler secret put DISCORD_BOT_TOKEN   # paste the bot token when prompted
+
+# Set the runtime secrets (each prompts for the value):
+npx wrangler secret put DISCORD_BOT_TOKEN     # the Discord bot token
+npx wrangler secret put DISCORD_GUILD_ID      # e.g. 1472702824109314058
+npx wrangler secret put ACCESS_TEAM_DOMAIN    # https://myjacobsnetwork.cloudflareaccess.com
+# ACCESS_AUD is set later in Step 4 (it doesn't exist yet).
+
 npm run deploy
 ```
 
@@ -133,8 +134,9 @@ In the **Zero Trust dashboard** (one.dash.cloudflare.com):
    - **HTTP URL:** `https://dnd-mcp.charmandcrit.com/mcp`  ← include the `/mcp` path.
    - Attach the same Access policy (only you).
    - **Advanced settings → enable *Managed OAuth*.**
-3. Put the **AUD tag** from step 1 into `config.json` → `accessAud`, then redeploy:
+3. Set the **AUD tag** from step 1 as a secret, then redeploy:
    ```bash
+   npx wrangler secret put ACCESS_AUD    # paste the Application Audience (AUD) tag
    npm run deploy
    ```
    (The Worker verifies that AUD on every request, so it must match.)
@@ -187,8 +189,8 @@ at `http://localhost:8787/mcp`.
 - **401 from `/mcp` in a browser** — expected; that path requires an Access token.
 - **`Missing Cf-Access-Jwt-Assertion`** — the request didn't go through Access. Make sure you're
   using the Access‑protected custom hostname and that the MCP server/app is configured in Step 4.
-- **`Invalid Access JWT: ... audience`** — `accessAud` in `config.json` doesn't match the Access
-  application's AUD tag. Copy it again and redeploy.
+- **`Invalid Access JWT: ... audience`** — the `ACCESS_AUD` secret doesn't match the Access
+  application's AUD tag. Set it again (`wrangler secret put ACCESS_AUD`) and redeploy.
 - **Discord `401/403`** — bot token wrong, or the bot isn't in the server / lacks View Channel +
   Read Message History.
 - **Empty message `content`** — enable **Message Content Intent** in the Developer Portal.
@@ -204,10 +206,9 @@ src/
   access.ts   Cloudflare Access JWT verification (jose + JWKS)
   discord.ts  Read-only Discord REST client
   mcp.ts      MCP server + tool definitions
-  config.ts   Loads config.json (guild, Access team domain + AUD)
-  types.ts    Env bindings (bot token secret)
-config.sample.json  Template — copy to config.json (gitignored) and fill in
-wrangler.toml       Worker config (routes; no secrets)
+  types.ts    Env bindings (all runtime secrets)
+.dev.vars.example   Template for local `.dev.vars` (gitignored)
+wrangler.toml       Worker config (route only; no secrets)
 ```
 
 Built with the Cloudflare [`agents`](https://www.npmjs.com/package/agents) `createMcpHandler`
