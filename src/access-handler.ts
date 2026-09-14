@@ -23,6 +23,21 @@ export async function handleAccessRequest(
 ) {
 	const { pathname, searchParams } = new URL(request.url);
 
+	// TEMPORARY diagnostic: reports which secrets are BOUND in the live version
+	// (booleans only — never the values). Remove once auth is confirmed working.
+	if (request.method === "GET" && pathname === "/debug/env") {
+		return Response.json({
+			COOKIE_ENCRYPTION_KEY: Boolean(env.COOKIE_ENCRYPTION_KEY),
+			ACCESS_CLIENT_ID: Boolean(env.ACCESS_CLIENT_ID),
+			ACCESS_CLIENT_SECRET: Boolean(env.ACCESS_CLIENT_SECRET),
+			ACCESS_AUTHORIZATION_URL: Boolean(env.ACCESS_AUTHORIZATION_URL),
+			ACCESS_TOKEN_URL: Boolean(env.ACCESS_TOKEN_URL),
+			ACCESS_JWKS_URL: Boolean(env.ACCESS_JWKS_URL),
+			DISCORD_BOT_TOKEN: Boolean(env.DISCORD_BOT_TOKEN),
+			DISCORD_GUILD_ID: Boolean(env.DISCORD_GUILD_ID),
+		});
+	}
+
 	if (request.method === "GET" && pathname === "/authorize") {
 		const oauthReqInfo = await env.OAUTH_PROVIDER.parseAuthRequest(request);
 		const { clientId } = oauthReqInfo;
