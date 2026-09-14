@@ -100,3 +100,20 @@ cp .dev.vars.example .dev.vars   # fill in the secrets
 npm install
 npm run dev
 ```
+
+---
+
+## Deploying (Workers Builds)
+
+Pushes to `main` are built and deployed by **Cloudflare Workers Builds**.
+
+- **Secrets are bound at deploy time.** After adding or changing a secret in the
+  dashboard, a new deploy must run for the live version to pick it up. If a
+  request errors with a missing binding (e.g. `cookieSecret is required for
+  signing cookies`), the running version predates the secret — redeploy.
+- **Confirm the latest version is actually serving.** Workers & Pages →
+  `dnd-discord-mcp` → **Deployments**: the newest version should be the active
+  one. If new versions are being uploaded but not promoted, set the build's
+  **Deploy command** to `npx wrangler deploy`.
+- `GET /debug/env` reports which secrets are bound in the live version
+  (booleans only, no values) — remove it once auth is confirmed working.
