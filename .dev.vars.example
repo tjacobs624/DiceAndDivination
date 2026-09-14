@@ -4,8 +4,7 @@
 # In production these are set as Cloudflare secrets instead:
 #   wrangler secret put DISCORD_BOT_TOKEN
 #   wrangler secret put DISCORD_GUILD_ID
-#   wrangler secret put ACCESS_TEAM_DOMAIN
-#   wrangler secret put ACCESS_AUD
+#   wrangler secret put MCP_SHARED_SECRET
 
 # Discord bot token (Developer Portal > your app > Bot > Reset Token).
 DISCORD_BOT_TOKEN="your-discord-bot-token"
@@ -13,13 +12,7 @@ DISCORD_BOT_TOKEN="your-discord-bot-token"
 # Default D&D Discord server (guild) ID.
 DISCORD_GUILD_ID="your-discord-server-id"
 
-# Cloudflare Access team domain (no trailing slash).
-ACCESS_TEAM_DOMAIN="https://myjacobsnetwork.cloudflareaccess.com"
-
-# Access application AUD tag (created in Step 4 — leave blank until then).
-ACCESS_AUD=""
-
-# Local-only: skip Cloudflare Access JWT verification so you can test tools with
-# `wrangler dev` (there is no Access proxy in front of a local dev server).
-# NEVER set this to "true" in production.
-DEV_AUTH_BYPASS="true"
+# Long random string that gates the MCP endpoint. Generate with:
+#   openssl rand -hex 32
+# The connector URL is https://<host>/mcp/<MCP_SHARED_SECRET>
+MCP_SHARED_SECRET="generate-a-long-random-string"

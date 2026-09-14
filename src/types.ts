@@ -6,10 +6,10 @@ export interface Env {
   DISCORD_BOT_TOKEN: string;
   /** Default Discord server (guild) ID for the tools. */
   DISCORD_GUILD_ID?: string;
-  /** Cloudflare Access team domain, e.g. https://myteam.cloudflareaccess.com (no trailing slash). */
-  ACCESS_TEAM_DOMAIN?: string;
-  /** Application Audience (AUD) tag of the Access app protecting this Worker. */
-  ACCESS_AUD?: string;
-  /** "true" only for local dev to skip Access JWT verification. */
-  DEV_AUTH_BYPASS?: string;
+  /**
+   * Shared secret that gates access to the MCP endpoint. The connector URL is
+   * `https://<host>/mcp/<MCP_SHARED_SECRET>`. Also accepted as
+   * `Authorization: Bearer <MCP_SHARED_SECRET>`.
+   */
+  MCP_SHARED_SECRET: string;
 }

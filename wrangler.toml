@@ -22,5 +22,4 @@ enabled = true
 # All runtime config is injected as Cloudflare secrets (or .dev.vars locally):
 #   wrangler secret put DISCORD_BOT_TOKEN
 #   wrangler secret put DISCORD_GUILD_ID
-#   wrangler secret put ACCESS_TEAM_DOMAIN
-#   wrangler secret put ACCESS_AUD
+#   wrangler secret put MCP_SHARED_SECRET
