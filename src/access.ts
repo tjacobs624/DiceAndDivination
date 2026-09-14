@@ -1,5 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
-import type { Env } from "./types";
+import { config } from "./config";
 
 /**
  * Verifies the Cloudflare Access identity JWT that Access injects on every
@@ -29,7 +29,7 @@ function jwksFor(team: string): JWTVerifyGetKey {
   return cachedJwks;
 }
 
-export async function verifyAccessJwt(request: Request, env: Env): Promise<VerifyResult> {
+export async function verifyAccessJwt(request: Request): Promise<VerifyResult> {
   const token = request.headers.get("Cf-Access-Jwt-Assertion");
   if (!token) {
     return {
@@ -40,20 +40,20 @@ export async function verifyAccessJwt(request: Request, env: Env): Promise<Verif
     };
   }
 
-  const team = env.ACCESS_TEAM_DOMAIN?.replace(/\/+$/, "");
-  if (!team || !env.ACCESS_AUD || env.ACCESS_AUD.startsWith("CHANGE-ME")) {
+  const team = config.accessTeamDomain?.replace(/\/+$/, "");
+  if (!team || !config.accessAud || config.accessAud.startsWith("YOUR_")) {
     return {
       ok: false,
       error:
-        "Server is missing ACCESS_TEAM_DOMAIN or ACCESS_AUD configuration. " +
-        "Set them in wrangler.jsonc / as secrets before going live.",
+        "Server is missing accessTeamDomain / accessAud in config.json. " +
+        "Copy config.sample.json to config.json and fill it in before going live.",
     };
   }
 
   try {
     const { payload } = await jwtVerify(token, jwksFor(team), {
       issuer: team,
-      audience: env.ACCESS_AUD,
+      audience: config.accessAud,
     });
     return {
       ok: true,

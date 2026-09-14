@@ -1,0 +1,5 @@
+{
+  "guildId": "YOUR_DISCORD_SERVER_ID",
+  "accessTeamDomain": "https://YOURNAME.cloudflareaccess.com",
+  "accessAud": "YOUR_ACCESS_APPLICATION_AUD_TAG"
+}

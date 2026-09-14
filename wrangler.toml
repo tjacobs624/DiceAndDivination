@@ -1,0 +1,25 @@
+name = "dnd-discord-mcp"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# The MCP endpoint must sit behind Cloudflare Access, and Access can only
+# protect a hostname inside a Cloudflare zone in THIS account. A *.workers.dev
+# URL cannot be protected by Access, so we disable it and serve from a custom
+# domain instead.
+workers_dev = false
+
+# Replace with a subdomain on a domain you own in this Cloudflare account
+# (the zone must be active in Cloudflare DNS). Not secret; safe to commit.
+[[routes]]
+pattern = "dnd-mcp.CHANGE-ME.example.com"
+custom_domain = true
+
+[observability]
+enabled = true
+
+# NOTE: There are intentionally no [vars] here.
+#  - The Discord bot token is a SECRET: `wrangler secret put DISCORD_BOT_TOKEN`.
+#  - Deploy config (guild ID, Access team domain + AUD) lives in `config.json`,
+#    which is gitignored. Copy `config.sample.json` to `config.json` and fill it
+#    in. Nothing real is ever committed.

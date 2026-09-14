@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
+import { config } from "./config";
 import type { Env } from "./types";
 import {
   cleanChannel,
@@ -33,11 +34,11 @@ function errText(e: unknown) {
 }
 
 /** Resolve the guild to use: explicit arg wins, otherwise the configured default. */
-function guildOf(env: Env, arg?: string): string {
-  const g = (arg && arg.trim()) || env.DISCORD_GUILD_ID;
-  if (!g || g.startsWith("CHANGE-ME")) {
+function guildOf(arg?: string): string {
+  const g = (arg && arg.trim()) || config.guildId;
+  if (!g || g.startsWith("YOUR_")) {
     throw new Error(
-      "No guild ID available. Pass guild_id, or set DISCORD_GUILD_ID in the Worker config."
+      "No guild ID available. Pass guild_id, or set guildId in config.json."
     );
   }
   return g;
@@ -62,7 +63,7 @@ export function buildServer(env: Env): McpServer {
     },
     async ({ guild_id }) => {
       try {
-        const guild = guildOf(env, guild_id);
+        const guild = guildOf(guild_id);
         const channels = await listChannels(env, guild);
         return text(channels.map(cleanChannel));
       } catch (e) {
@@ -95,7 +96,7 @@ export function buildServer(env: Env): McpServer {
     },
     async ({ channel, limit, before, after, guild_id }) => {
       try {
-        const guild = guildOf(env, guild_id);
+        const guild = guildOf(guild_id);
         const channelId = await resolveChannelId(env, guild, channel);
         const messages = await getMessages(env, channelId, { limit, before, after });
         return text({ channel_id: channelId, count: messages.length, messages: messages.map(cleanMessage) });
@@ -130,7 +131,7 @@ export function buildServer(env: Env): McpServer {
     },
     async ({ channel, query, author_id, limit, max_scan, guild_id }) => {
       try {
-        const guild = guildOf(env, guild_id);
+        const guild = guildOf(guild_id);
         const channelId = await resolveChannelId(env, guild, channel);
         const matches = await searchMessages(env, channelId, {
           query,
@@ -159,7 +160,7 @@ export function buildServer(env: Env): McpServer {
     },
     async ({ channel, guild_id }) => {
       try {
-        const guild = guildOf(env, guild_id);
+        const guild = guildOf(guild_id);
         const channelId = await resolveChannelId(env, guild, channel);
         const pins = await getPins(env, channelId);
         return text({ channel_id: channelId, count: pins.length, pinned: pins.map(cleanMessage) });
@@ -181,7 +182,7 @@ export function buildServer(env: Env): McpServer {
     },
     async ({ channel, guild_id }) => {
       try {
-        const guild = guildOf(env, guild_id);
+        const guild = guildOf(guild_id);
         const channelId = await resolveChannelId(env, guild, channel);
         const info = await getChannel(env, channelId);
         return text(cleanChannel(info));
@@ -202,7 +203,7 @@ export function buildServer(env: Env): McpServer {
     },
     async ({ guild_id }) => {
       try {
-        const guild = guildOf(env, guild_id);
+        const guild = guildOf(guild_id);
         return text(await getGuild(env, guild));
       } catch (e) {
         return errText(e);
@@ -225,7 +226,7 @@ export function buildServer(env: Env): McpServer {
     },
     async ({ limit, guild_id }) => {
       try {
-        const guild = guildOf(env, guild_id);
+        const guild = guildOf(guild_id);
         const members = await listMembers(env, guild, limit ?? 100);
         return text(
           members.map((m) => ({

@@ -23,7 +23,7 @@ export default {
 
     // Enforce Cloudflare Access identity (skip only for local dev bypass).
     if (env.DEV_AUTH_BYPASS !== "true") {
-      const auth = await verifyAccessJwt(request, env);
+      const auth = await verifyAccessJwt(request);
       if (!auth.ok) {
         return new Response(JSON.stringify({ error: "unauthorized", detail: auth.error }), {
           status: 401,

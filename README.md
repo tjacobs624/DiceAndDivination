@@ -73,14 +73,26 @@ All tools accept a channel **ID** or a **`#channel-name`**, and default to your 
 
 ## Step 2 — Configure the project
 
-Edit **`wrangler.jsonc`**:
+Config is split the same way as `discord-oidc`: **secrets and deploy config never get committed.**
 
-- `routes[0].pattern` → the custom hostname you'll serve this on, e.g. `dnd-mcp.yourdomain.com`
-  (a subdomain on a zone in your Cloudflare account).
-- `vars.DISCORD_GUILD_ID` → your server ID from Step 1.5.
-- `vars.ACCESS_TEAM_DOMAIN` → already set to `https://myjacobsnetwork.cloudflareaccess.com`.
-- `vars.ACCESS_AUD` → leave the placeholder for now; you fill it in **Step 4** after Access gives
-  you the AUD tag. (Redeploy after you set it.)
+1. **`config.json`** (gitignored — real values live here only). Copy the sample and fill it in:
+   ```bash
+   cp config.sample.json config.json
+   ```
+   ```jsonc
+   {
+     "guildId": "your D&D server ID (Step 1.5)",
+     "accessTeamDomain": "https://myjacobsnetwork.cloudflareaccess.com",
+     "accessAud": "fill in after Step 4 (the Access application AUD tag)"
+   }
+   ```
+   Leave `accessAud` as the placeholder for now; you set it in **Step 4** and redeploy.
+
+2. **`wrangler.toml`** (committed — no secrets here). Set `routes[0].pattern` to the custom
+   hostname you'll serve on, e.g. `dnd-mcp.yourdomain.com` (a subdomain on a zone in your Cloudflare
+   account). The hostname isn't secret, so it's fine to commit.
+
+3. The **bot token** is a Cloudflare secret, set in Step 3 — never in a file.
 
 ---
 
@@ -93,8 +105,8 @@ npx wrangler secret put DISCORD_BOT_TOKEN   # paste the bot token when prompted
 npm run deploy
 ```
 
-The `routes` entry with `custom_domain: true` tells Cloudflare to create the custom hostname and
-route it to this Worker (the zone must already exist in your account). After deploy, visiting
+The `[[routes]]` entry with `custom_domain = true` tells Cloudflare to create the custom hostname
+and route it to this Worker (the zone must already exist in your account). After deploy, visiting
 `https://dnd-mcp.yourdomain.com/` should return a small "is running" message.
 
 > The `/mcp` endpoint itself will return **401 unauthorized** until you put Access in front of it —
@@ -121,7 +133,7 @@ In the **Zero Trust dashboard** (one.dash.cloudflare.com):
    - **HTTP URL:** `https://dnd-mcp.yourdomain.com/mcp`  ← include the `/mcp` path.
    - Attach the same Access policy (only you).
    - **Advanced settings → enable *Managed OAuth*.**
-3. Put the **AUD tag** from step 1 into `wrangler.jsonc` → `vars.ACCESS_AUD`, then redeploy:
+3. Put the **AUD tag** from step 1 into `config.json` → `accessAud`, then redeploy:
    ```bash
    npm run deploy
    ```
@@ -175,8 +187,8 @@ at `http://localhost:8787/mcp`.
 - **401 from `/mcp` in a browser** — expected; that path requires an Access token.
 - **`Missing Cf-Access-Jwt-Assertion`** — the request didn't go through Access. Make sure you're
   using the Access‑protected custom hostname and that the MCP server/app is configured in Step 4.
-- **`Invalid Access JWT: ... audience`** — `ACCESS_AUD` doesn't match the Access application's AUD
-  tag. Copy it again and redeploy.
+- **`Invalid Access JWT: ... audience`** — `accessAud` in `config.json` doesn't match the Access
+  application's AUD tag. Copy it again and redeploy.
 - **Discord `401/403`** — bot token wrong, or the bot isn't in the server / lacks View Channel +
   Read Message History.
 - **Empty message `content`** — enable **Message Content Intent** in the Developer Portal.
@@ -192,8 +204,10 @@ src/
   access.ts   Cloudflare Access JWT verification (jose + JWKS)
   discord.ts  Read-only Discord REST client
   mcp.ts      MCP server + tool definitions
-  types.ts    Env bindings
-wrangler.jsonc Worker config (routes, vars)
+  config.ts   Loads config.json (guild, Access team domain + AUD)
+  types.ts    Env bindings (bot token secret)
+config.sample.json  Template — copy to config.json (gitignored) and fill in
+wrangler.toml       Worker config (routes; no secrets)
 ```
 
 Built with the Cloudflare [`agents`](https://www.npmjs.com/package/agents) `createMcpHandler`
