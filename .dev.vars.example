@@ -1,25 +1,22 @@
 # Copy this file to `.dev.vars` for local development with `wrangler dev`.
 # `.dev.vars` is gitignored — never commit real values.
-#
-# In production these are set as Cloudflare secrets instead:
-#   wrangler secret put DISCORD_BOT_TOKEN
-#   wrangler secret put DISCORD_GUILD_ID
-#   wrangler secret put ACCESS_TEAM_DOMAIN
-#   wrangler secret put ACCESS_AUD
+# In production these are set as Cloudflare secrets (Workers & Pages > the Worker
+# > Settings > Variables and Secrets, or `wrangler secret put <NAME>`).
 
-# Discord bot token (Developer Portal > your app > Bot > Reset Token).
+# From the Access for SaaS application (Zero Trust > Access > Applications):
+ACCESS_CLIENT_ID="from the SaaS app: Client ID"
+ACCESS_CLIENT_SECRET="from the SaaS app: Client secret"
+ACCESS_AUTHORIZATION_URL="from the SaaS app: Authorization endpoint"
+ACCESS_TOKEN_URL="from the SaaS app: Token endpoint"
+ACCESS_JWKS_URL="from the SaaS app: Key endpoint"
+
+# Random 32-byte hex. Generate with: openssl rand -hex 32
+COOKIE_ENCRYPTION_KEY="generate-with-openssl-rand-hex-32"
+
+# Discord.
 DISCORD_BOT_TOKEN="your-discord-bot-token"
+DISCORD_GUILD_ID="1472702824109314058"
 
-# Default D&D Discord server (guild) ID.
-DISCORD_GUILD_ID="your-discord-server-id"
-
-# Cloudflare Access team domain (no trailing slash).
-ACCESS_TEAM_DOMAIN="https://myjacobsnetwork.cloudflareaccess.com"
-
-# Access application AUD tag (created in Step 4 — leave blank until then).
-ACCESS_AUD=""
-
-# Local-only: skip Cloudflare Access JWT verification so you can test tools with
-# `wrangler dev` (there is no Access proxy in front of a local dev server).
-# NEVER set this to "true" in production.
-DEV_AUTH_BYPASS="true"
+# Optional: comma-separated emails allowed to use the tools. If unset, any user
+# who passes the Access policy may use them.
+# ALLOWED_EMAILS="timothyjacobs624@yahoo.com"
