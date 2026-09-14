@@ -127,7 +127,3 @@ One-time setup in the dashboard:
    ```
 3. Re-run the build (push to `main`, or Deployments → Retry). The deploy now
    re-applies the secrets into the live version every time.
-
-Verify with `GET /debug/env` — it reports which secrets are bound in the live
-version (booleans only, no values). Once every value is `true` and auth works,
-remove the `/debug/env` route.
