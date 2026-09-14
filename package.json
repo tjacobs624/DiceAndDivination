@@ -5,6 +5,7 @@
   "description": "Remote MCP server on Cloudflare Workers that lets Claude read a Discord D&D server, authenticated with OAuth via Cloudflare Access (Access for SaaS) and Discord sign-in.",
   "scripts": {
     "deploy": "wrangler deploy",
+    "deploy:ci": "sh scripts/ci-deploy.sh",
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "cf-typegen": "wrangler types",

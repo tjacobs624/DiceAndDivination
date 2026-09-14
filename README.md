@@ -107,13 +107,27 @@ npm run dev
 
 Pushes to `main` are built and deployed by **Cloudflare Workers Builds**.
 
-- **Secrets are bound at deploy time.** After adding or changing a secret in the
-  dashboard, a new deploy must run for the live version to pick it up. If a
-  request errors with a missing binding (e.g. `cookieSecret is required for
-  signing cookies`), the running version predates the secret — redeploy.
-- **Confirm the latest version is actually serving.** Workers & Pages →
-  `dnd-discord-mcp` → **Deployments**: the newest version should be the active
-  one. If new versions are being uploaded but not promoted, set the build's
-  **Deploy command** to `npx wrangler deploy`.
-- `GET /debug/env` reports which secrets are bound in the live version
-  (booleans only, no values) — remove it once auth is confirmed working.
+**Important:** Workers Builds *wipes* dashboard-set runtime secrets on every git
+deploy ([cloudflare/workers-sdk#8871](https://github.com/cloudflare/workers-sdk/issues/8871)).
+So the secrets are **not** kept in the Worker's runtime Variables and Secrets —
+they are re-applied on every deploy via `wrangler deploy --secrets-file` (see
+`scripts/ci-deploy.sh`), sourced from Workers Builds' encrypted build variables.
+
+One-time setup in the dashboard:
+
+1. **Workers & Pages → `dnd-discord-mcp` → Settings → Build → Variables and
+   Secrets** (the *build* section, not the runtime one). Add each of these as an
+   encrypted **Secret**:
+   `COOKIE_ENCRYPTION_KEY`, `ACCESS_CLIENT_ID`, `ACCESS_CLIENT_SECRET`,
+   `ACCESS_AUTHORIZATION_URL`, `ACCESS_TOKEN_URL`, `ACCESS_JWKS_URL`,
+   `DISCORD_BOT_TOKEN`, `DISCORD_GUILD_ID`, and optionally `ALLOWED_EMAILS`.
+2. Same **Build** settings → set the **Deploy command** to:
+   ```
+   npm run deploy:ci
+   ```
+3. Re-run the build (push to `main`, or Deployments → Retry). The deploy now
+   re-applies the secrets into the live version every time.
+
+Verify with `GET /debug/env` — it reports which secrets are bound in the live
+version (booleans only, no values). Once every value is `true` and auth works,
+remove the `/debug/env` route.
